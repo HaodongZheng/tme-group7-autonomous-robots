@@ -33,7 +33,7 @@ cp ceiling.jpg cone.obj floor.jpg kiwi.obj kiwi.png wall.jpg ~/tme290-group7-tes
 * Step 6: Then start the corresponding -auto yml file to test each task in the simulation environment.
 ```bash
 cd ~/tme290-group7-testing
-docker-compose -f task-{1,2,3}-auto.yml
+docker-compose -f task-{1,2,3}-auto.yml up
 ```
 
 ---
@@ -61,7 +61,7 @@ docker build -t tme290-group7-logic-control tme290-group7-logic-control
 * Step 4: Run the test using the provided `.yml` file:
 ```bash
 cd tme290-group7-testing
-docker-compose -f task-1.yml
+docker-compose -f task-1.yml up
 ```
 
 ---
@@ -79,7 +79,7 @@ docker build -t tme290-group7-kiwi-detection tme290-group7-kiwi-detection
 * Step 5: Run the test using the provided `.yml` file:
 ```bash
 cd tme290-group7-testing
-docker-compose -f task-2.yml
+docker-compose -f task-2.yml up
 ```
 
 ---
@@ -90,5 +90,5 @@ docker-compose -f task-2.yml
 * Step 5: Run the test using the provided `.yml` file:
 ```bash
 cd tme290-group7-testing
-docker-compose -f task-3.yml
+docker-compose -f task-3.yml up
 ```
