@@ -1,0 +1,127 @@
+version: "3.6"
+
+services:
+  sim-global:
+    image: chalmersrevere/opendlv-sim-global-amd64:v0.0.7
+    network_mode: "host"
+    command: "/usr/bin/opendlv-sim-global --cid=111 --freq=50 --frame-id=0 --x=-0.5 --y=-0.0 --yaw=0.0 --timemod=0.1"
+
+  sim-motor-kiwi:
+    image: chalmersrevere/opendlv-sim-motor-kiwi-amd64:v0.0.7
+    network_mode: "host"
+    command: "/usr/bin/opendlv-sim-motor-kiwi --cid=111 --freq=200 --frame-id=0 --timemod=0.1"
+
+  sim-camera:
+    container_name: sim-camera
+    image: chalmersrevere/opendlv-sim-camera-mesa:v0.0.1
+    ipc: "host"
+    network_mode: "host"
+    volumes:
+      - ${PWD}/crossing2:/opt/map
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --frame-id=0 --map-path=/opt/map --x=0.0 --z=0.095 --width=1280 --height=720 --fovy=48.8 --freq=7.5 --timemod=0.1 --verbose"
+
+  opendlv-kiwi-view:
+    image: chrberger/opendlv-kiwi-view-webrtc-multi:v0.0.6
+    network_mode: "host"
+    volumes:
+      - ~/recordings:/opt/vehicle-view/recordings
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PORT=8081
+      - OD4SESSION_CID=111
+      - PLAYBACK_OD4SESSION_CID=253
+
+  cone-detection:
+    image: tme290-group7-cone-detection
+    depends_on: 
+      - "sim-camera"
+    ipc: "host"
+    network_mode: "host"
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --name=video0.argb --width=1280 --height=720 --verbose"
+
+  logic-control:
+    image: tme290-group7-logic-control
+    network_mode: "host"
+    command: "/usr/bin/tme290-group7-logic-control --cid=111 --frame-id=0 --freq=10 --verbose"
+
+  kiwi-detection:
+    image: tme290-group7-kiwi-detection
+    depends_on: 
+      - "sim-camera"
+    network_mode: "host"
+    ipc: "host"
+    volumes:
+      - /tmp:/tmp
+      - ./yolo:/opt/yolo
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=111 --name=video0.argb --width=1280 --height=720 --verbose"
+  sim-global-two:
+    image: chalmersrevere/opendlv-sim-global-amd64:v0.0.7
+    network_mode: "host"
+    command: "/usr/bin/opendlv-sim-global --cid=112 --freq=50 --timemod=0.1 --frame-id=0 --x=0.0 --y=-0.2 --yaw=1.57 --extra-cid-out=111:1"
+
+  sim-motor-kiwi-two:
+    image: chalmersrevere/opendlv-sim-motor-kiwi-amd64:v0.0.7
+    network_mode: "host"
+    command: "/usr/bin/opendlv-sim-motor-kiwi --cid=112 --freq=200 --timemod=0.1 --frame-id=0"
+
+  sim-camera-two:
+    container_name: sim-camera-two
+    image: chalmersrevere/opendlv-sim-camera-mesa:v0.0.1
+    ipc: "host"
+    network_mode: "host"
+    volumes:
+      - ${PWD}/crossing2:/opt/map
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=112 --frame-id=0 --map-path=/opt/map --x=0.0 --z=0.095 --width=1280 --height=720 --fovy=48.8 --freq=7.5 --timemod=0.1 --name.argb=video1.argb"
+
+  opendlv-kiwi-view-two:
+    image: chrberger/opendlv-kiwi-view-webrtc-multi:v0.0.6
+    network_mode: "host"
+    volumes:
+      - ~/recordings:/opt/vehicle-view/recordings
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - PORT=8082
+      - OD4SESSION_CID=112
+      - PLAYBACK_OD4SESSION_CID=254
+  
+  cone-detection-two:
+    image: tme290-group7-cone-detection
+    depends_on: 
+      - "sim-camera-two"
+    ipc: "host"
+    network_mode: "host"
+    volumes:
+      - /tmp:/tmp
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=112 --name=video1.argb --width=1280 --height=720"
+
+  kiwi-detection-two:
+    image: tme290-group7-kiwi-detection
+    depends_on: 
+      - "sim-camera-two"
+    network_mode: "host"
+    ipc: "host"
+    volumes:
+      - /tmp:/tmp
+      - ./yolo:/opt/yolo
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: "--cid=112 --name=video1.argb --width=1280 --height=720"
+
+  logic-control-two:
+    image: tme290-group7-logic-control
+    network_mode: "host"
+    command: "/usr/bin/tme290-group7-logic-control --cid=112 --frame-id=0 --freq=10"
